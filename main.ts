@@ -99,6 +99,11 @@ function normalize(wire, values, model, streaming) {
         if (b.type==='text') text+=b.text;
         if (b.type==='tool_use') calls.push({id:b.id,type:'function',function:{name:b.name,arguments:JSON.stringify(b.input)}});
       }
+      if (v.type==='content_block_start' && v.content_block?.type==='tool_use') {
+        const b=v.content_block;
+        calls[v.index]={id:b.id,type:'function',function:{name:b.name,arguments:''}};
+      }
+      if (v.type==='content_block_delta' && v.delta.type==='input_json_delta' && calls[v.index]) calls[v.index].function.arguments+=v.delta.partial_json;
       if (v.type==='content_block_delta' && v.delta.type==='text_delta') text+=v.delta.text;
       if (msg.stop_reason) finish=msg.stop_reason;
       if (v.delta?.stop_reason) finish=v.delta.stop_reason;
